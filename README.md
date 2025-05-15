@@ -17,16 +17,6 @@ EmpleoExpress es una plataforma web desarrollada en PHP que facilita la conexió
 - **Base de datos**: MySQL (estructura en `/sql/`)
 - **Servidor local recomendado**: XAMPP o similar
 
-## 📁 Estructura del proyecto
-
-empleoExpress/
-│
-├── css/ # Archivos de estilos
-├── images/ # Imágenes utilizadas
-├── js/ # Scripts de JavaScript
-├── php/ # Lógica del servidor (PHP)
-├── sql/ # Script de base de datos
-└── index.php # Punto de entrada principal
 
 ## ⚙️ Instalación y uso
 
