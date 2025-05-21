@@ -36,5 +36,5 @@ EmpleoExpress es una plataforma web desarrollada en PHP que facilita la conexió
 
   http://localhost/empleoExpress/
 
-##🧑‍💻 Autor
+## 🧑‍💻 Autor
 Desarrollado por @andmen05
