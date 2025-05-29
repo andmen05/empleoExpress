@@ -87,13 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: #f0f0f0;
+    background: linear-gradient(to bottom right, #4c8bca, #ffffff);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     padding: 20px;
 }
+
 
 /* Contenedor principal */
 .container {
@@ -109,7 +110,7 @@ body {
 /* Título */
 h1 {
     font-size: 1.8rem;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 20px;
 }
 
@@ -125,7 +126,7 @@ form {
 label {
     font-size: 1rem;
     font-weight: bold;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 8px;
 }
 
@@ -142,13 +143,13 @@ input, textarea, select {
 
 /* Efecto en el foco */
 input:focus, textarea:focus, select:focus {
-    border-color: #6c5ce7;
+    border-color: #4c8bca;
     outline: none;
 }
 
 /* Botones */
 button {
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: white;
     border: none;
     padding: 12px;
@@ -160,7 +161,7 @@ button {
 
 /* Hover en botones */
 button:hover {
-    background-color: #8e44ad;
+    background-color: #4c8bca;
 }
 
 /* Mensajes de error */
@@ -177,7 +178,7 @@ button:hover {
 
 h3 {
     margin-top: 20px;
-    color: #6c5ce7;
+    color: #4c8bca;
     font-size: 1.2rem;
 }
 
@@ -188,7 +189,7 @@ p {
 }
 
 a {
-    color: #6c5ce7;
+    color: #4c8bca;
     text-decoration: none;
     font-weight: bold;
 }

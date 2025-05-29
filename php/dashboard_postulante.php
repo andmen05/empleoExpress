@@ -95,8 +95,8 @@ body, h1, h2, h3, p, form, input, textarea, button {
 body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
-    color: #4a4a4a;
-    background: linear-gradient(135deg, #8e44ad, #6c5ce7);
+    color:rgb(0, 0, 0);
+    background: linear-gradient(135deg,#4c8bca,#ffffff);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -118,7 +118,7 @@ body {
 
 /* Header */
 header {
-    background: linear-gradient(135deg, #6c5ce7, #8e44ad);
+    background: linear-gradient(135deg, #4c8bca,rgb(255, 255, 255));
     color: #fff;
     padding: 30px 20px;
     border-radius: 10px;
@@ -171,8 +171,8 @@ header p {
 .offers-section h2 {
     font-size: 1.6rem;
     margin-bottom: 15px;
-    color: #6c5ce7;
-    border-bottom: 2px solid #6c5ce7;
+    color: #4c8bca;
+    border-bottom: 2px solid #4c8bca;
     display: inline-block;
     padding-bottom: 5px;
 }
@@ -194,13 +194,13 @@ textarea, input {
 }
 
 textarea:focus, input:focus {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 10px rgba(108, 92, 231, 0.3);
+    border-color: #4c8bca;
+    box-shadow: 0 0 10px #4c8bca;
     outline: none;
 }
 
 button {
-    background: #6c5ce7;
+    background: #4c8bca;
     color: #fff;
     border: none;
     padding: 12px 20px;
@@ -211,9 +211,9 @@ button {
 }
 
 button:hover {
-    background: #8e44ad;
+    background: #4c8bca;
     transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.2);
+    box-shadow: 0 4px 10px #4c8bca;
 }
 
 /* Offer Section */
@@ -233,7 +233,7 @@ button:hover {
 
 .offer h3 {
     margin-bottom: 10px;
-    color: #6c5ce7;
+    color: #4c8bca;
     font-size: 1.4rem;
 }
 

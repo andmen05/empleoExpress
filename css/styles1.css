@@ -36,7 +36,7 @@ nav {
 }
 
 nav .btn {
-    background-color: #007bff;
+    background-color: #4c8bca;
     color: white;
     padding: 10px 20px;
     text-decoration: none;
@@ -46,7 +46,7 @@ nav .btn {
 }
 
 nav .btn:hover {
-    background-color: #0056b3;
+    background-color: #4c8bca;
 }
 
 /* Form Section */
@@ -110,7 +110,7 @@ table th, table td {
 }
 
 table th {
-    background-color: #007bff;
+    background-color: #4c8bca;
     color: white;
 }
 
@@ -119,7 +119,7 @@ table tr:nth-child(even) {
 }
 
 table .btn {
-    background-color: #007bff;
+    background-color: #4c8bca;
     color: white;
     padding: 5px 10px;
     text-decoration: none;
@@ -128,7 +128,7 @@ table .btn {
 }
 
 table .btn:hover {
-    background-color: #0056b3;
+    background-color: #4c8bca;
 }
 
 table .btn-danger {

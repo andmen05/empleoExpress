@@ -119,7 +119,7 @@ body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
     color: #4a4a4a;
-    background: linear-gradient(135deg, #8e44ad, #6c5ce7);
+    background: linear-gradient(135deg, #4c8bca,rgb(255, 255, 255));
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -141,7 +141,7 @@ body {
 
 /* Header */
 header {
-    background: linear-gradient(135deg, #6c5ce7, #8e44ad);
+    background: linear-gradient(135deg, #4c8bca,#ffffff);
     color: #fff;
     padding: 30px 20px;
     border-radius: 10px;
@@ -157,7 +157,7 @@ header h1 {
 header p {
     font-size: 1.1rem;
     margin-top: 10px;
-    color: #e4e4e4;
+    color: #4c8bca;
 }
 
 nav a {
@@ -185,7 +185,7 @@ nav a:hover {
 /* Form Section */
 .form-section h2 {
     font-size: 1.8rem;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 20px;
 }
 
@@ -209,13 +209,13 @@ input, textarea {
 }
 
 input:focus, textarea:focus {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 10px rgba(108, 92, 231, 0.3);
+    border-color: #4c8bca;
+    box-shadow: 0 0 10px #4c8bca;
     outline: none;
 }
 
 button {
-    background: #6c5ce7;
+    background: #4c8bca;
     color: #fff;
     border: none;
     padding: 12px 20px;
@@ -226,15 +226,15 @@ button {
 }
 
 button:hover {
-    background: #8e44ad;
+    background: #4c8bca;
     transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.2);
+    box-shadow: 0 4px 10px #4c8bca;
 }
 
 /* Offers Table */
 .offers-section h2 {
     font-size: 1.8rem;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 20px;
 }
 
@@ -250,7 +250,7 @@ button:hover {
 }
 
 .offers-table th {
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: #fff;
 }
 
@@ -263,21 +263,21 @@ button:hover {
     padding: 8px 15px;
     margin: 5px 0;
     border-radius: 10px;
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: #fff;
     text-decoration: none;
     transition: all 0.3s ease;
 }
 
 .offers-table td a:hover {
-    background-color: #8e44ad;
+    background-color: #4c8bca;
     transform: translateY(-2px);
 }
 
 /* Applications Section */
 .applications-section h2 {
     font-size: 1.8rem;
-    color: #6c5ce7;
+    color:#4c8bca;
     margin-bottom: 20px;
 }
 
@@ -293,7 +293,7 @@ button:hover {
 }
 
 .applications-table th {
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: #fff;
 }
 

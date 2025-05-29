@@ -89,7 +89,7 @@ body {
 
 h1 {
     font-size: 2rem;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 20px;
 }
 
@@ -105,7 +105,7 @@ form {
 label {
     font-size: 1rem;
     font-weight: bold;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 8px;
 }
 
@@ -122,7 +122,7 @@ input, textarea {
 
 /* Efecto en el foco */
 input:focus, textarea:focus {
-    border-color: #6c5ce7;
+    border-color: #4c8bca;
     outline: none;
 }
 
@@ -134,7 +134,7 @@ textarea {
 
 /* Botón de acción */
 button {
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: white;
     border: none;
     padding: 12px;
@@ -146,7 +146,7 @@ button {
 
 /* Hover en botón */
 button:hover {
-    background-color: #8e44ad;
+    background-color: #4c8bca;
 }
 
 /* Enlace de volver */
@@ -156,7 +156,7 @@ a {
     padding: 12px;
     text-decoration: none;
     color: white;
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     border-radius: 8px;
     font-size: 1rem;
     width: 100%;
@@ -164,7 +164,7 @@ a {
 }
 
 a:hover {
-    background-color: #8e44ad;
+    background-color: #4c8bca;
 }
 
 /* Responsividad */

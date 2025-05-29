@@ -89,7 +89,7 @@ table td button:hover {
 
 /* Accept button */
 .btn-aceptar {
-    background-color: #007BFF;
+    background-color: #4c8bca;
     padding: 8px 16px;
     border: none;
     color: white;
@@ -98,5 +98,5 @@ table td button:hover {
 }
 
 .btn-aceptar:hover {
-    background-color: #0056b3;
+    background-color: #4c8bca;
 }
