@@ -73,7 +73,7 @@
             <div class="menu">
                 <nav>
                     <ul>
-                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#">PACHO</a></li>
                         <li><a href="#about">Sobre nosotros</a></li>
                         <li><a href="#services">Servicios</a></li>
                         <li><a href="#contact">Contactos</a></li>
