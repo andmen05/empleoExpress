@@ -95,7 +95,7 @@ body {
 /* Título */
 header h1 {
     font-size: 2rem;
-    color: #6c5ce7;
+    color: #4c8bca;
     margin-bottom: 20px;
 }
 
@@ -117,7 +117,7 @@ table th, table td {
 }
 
 table th {
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: white;
     font-size: 1.1rem;
 }
@@ -172,7 +172,7 @@ footer {
 }
 
 .btn-volver {
-    background-color: #6c5ce7;
+    background-color: #4c8bca;
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
@@ -182,7 +182,7 @@ footer {
 }
 
 .btn-volver:hover {
-    background-color: #8e44ad;
+    background-color: #4c8bca;
 }
 
 /* Responsividad */
