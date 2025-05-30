@@ -43,7 +43,6 @@ if ($result_aceptacion_rechazo->num_rows > 0) {
     $estado_postulacion = 'sin_postulacion';
 }
 
-
 // Actualizar la información del postulante
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
     $nuevas_habilidades = $_POST['habilidades'];
@@ -79,276 +78,622 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard del Postulante</title>
-    <link rel="stylesheet" href="../css/styles.css">
-<style>
-/* styles2.css */
+    <title>Dashboard del Postulante - EmpleoExpress</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        /* ===== RESET Y CONFIGURACIÓN GLOBAL ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* General Reset */
-body, h1, h2, h3, p, form, input, textarea, button {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #4c8bca 0%, #3a6f9a 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
 
-/* General Styles */
-body {
-    font-family: 'Poppins', sans-serif;
-    line-height: 1.6;
-    color:rgb(0, 0, 0);
-    background: linear-gradient(135deg,#4c8bca,#ffffff);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 30px 20px; /* Espaciado general */
-}
+        /* ===== PATRÓN DE FONDO SVG ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
+        }
 
-.container {
-    background: #ffffff;
-    max-width: 900px;
-    width: 100%;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    animation: fadeIn 0.8s ease-in-out;
-    padding: 30px; /* Espaciado interno */
-    position: relative; /* Para posicionar elementos dentro */
-}
+        /* ===== CONTAINER PRINCIPAL ===== */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
 
-/* Header */
-header {
-    background: linear-gradient(135deg, #4c8bca,rgb(255, 255, 255));
-    color: #fff;
-    padding: 30px 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    position: relative;
-}
+        /* ===== HEADER ===== */
+        .dashboard-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
 
-header h1 {
-    font-size: 2rem;
-    font-weight: bold;
-}
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #4c8bca 0%, #3a6f9a 100%);
+        }
 
-header p {
-    font-size: 1.1rem;
-    margin-top: 10px;
-    color: #e4e4e4;
-}
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
 
-/* Botón de Cerrar Sesión */
-.logout-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: #e74c3c;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    text-decoration: none; /* Para evitar subrayado si es un enlace */
-}
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
 
-.logout-btn:hover {
-    background: #c0392b;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);
-}
+        .welcome-section p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
 
-/* Sections */
-.section {
-    margin-bottom: 30px;
-}
+        .logout-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-.update-section h2,
-.acceptance-section h2,
-.offers-section h2 {
-    font-size: 1.6rem;
-    margin-bottom: 15px;
-    color: #4c8bca;
-    border-bottom: 2px solid #4c8bca;
-    display: inline-block;
-    padding-bottom: 5px;
-}
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
 
-/* Form Styles */
-.form {
-    margin-top: 15px;
-}
+        /* ===== GRID LAYOUT ===== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
 
-textarea, input {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: #f8f8f8;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-}
+        /* ===== CARDS GENERALES ===== */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
 
-textarea:focus, input:focus {
-    border-color: #4c8bca;
-    box-shadow: 0 0 10px #4c8bca;
-    outline: none;
-}
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
 
-button {
-    background: #4c8bca;
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
-button:hover {
-    background: #4c8bca;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px #4c8bca;
-}
+        .card-title i {
+            color: #4c8bca;
+            font-size: 1.25rem;
+        }
 
-/* Offer Section */
-.offer {
-    padding: 20px;
-    background: #fafafa;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+        /* ===== FORMULARIO DE ACTUALIZACIÓN ===== */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
 
-.offer:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
 
-.offer h3 {
-    margin-bottom: 10px;
-    color: #4c8bca;
-    font-size: 1.4rem;
-}
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
 
-.offer p {
-    margin: 5px 0;
-    color: #777;
-}
+        .form-control:focus {
+            outline: none;
+            border-color: #4c8bca;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 139, 202, 0.1);
+        }
 
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
 
-</style>
+        /* ===== BOTONES ===== */
+        .btn-primary {
+            background: linear-gradient(135deg, #4c8bca 0%, #3a6f9a 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 139, 202, 0.3);
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(46, 204, 113, 0.3);
+        }
+
+        /* ===== ESTADO DE POSTULACIÓN ===== */
+        .status-card {
+            margin-bottom: 2rem;
+        }
+
+        .status-accepted {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .status-rejected {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        /* ===== OFERTAS LABORALES ===== */
+        .offers-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid #4c8bca;
+        }
+
+        .offer-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .offer-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .offer-company {
+            color: #4c8bca;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .offer-description {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .offer-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-message {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .already-applied {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .no-apply {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* ===== ANIMACIONES ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                text-align: center;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .offers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== MENSAJE DE ÉXITO ===== */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== LOADING STATES ===== */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
     <script>
         // Mostrar el mensaje de éxito si los datos fueron actualizados
         <?php if (isset($_SESSION['datos_actualizados'])): ?>
             window.onload = function() {
-                alert("<?php echo $_SESSION['datos_actualizados']; ?>");
-                <?php unset($_SESSION['datos_actualizados']); ?> // Eliminar la variable de sesión después de mostrar el mensaje
+                showSuccessMessage("<?php echo $_SESSION['datos_actualizados']; ?>");
+                <?php unset($_SESSION['datos_actualizados']); ?>
             };
         <?php endif; ?>
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.style.animation = 'slideInRight 0.5s ease-out reverse';
+                setTimeout(() => successDiv.remove(), 500);
+            }, 3000);
+        }
+
+        // Añadir efecto de loading a los botones
+        function addLoadingEffect(button) {
+            button.classList.add('btn-loading');
+            button.innerHTML = '<span style="opacity: 0;">Cargando...</span>';
+        }
+
+        // Inicializar AOS
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true
+            });
+        });
     </script>
 </head>
 <body>
-    <div class="container">
-    <header>
-    <h1>Bienvenido, <?php echo htmlspecialchars($user_name); ?></h1>
-    <p>Este es tu dashboard. Aquí puedes postularte a las ofertas laborales, ver el estado de tus postulaciones y actualizar tus datos.</p>
-    <a href="logout.php" class="logout-btn">Cerrar Sesión</a>
-</header>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header" data-aos="fade-down">
+            <div class="header-content">
+                <div class="welcome-section">
+                    <h1><i class="fas fa-user-circle"></i> Bienvenido, <?php echo htmlspecialchars($user_name); ?></h1>
+                    <p>Gestiona tu perfil profesional y encuentra las mejores oportunidades laborales</p>
+                </div>
+                <a href="logout.php" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </header>
 
+        <!-- Estado de Postulación -->
+        <div class="status-card card 
+            <?php 
+                if ($estado_postulacion == 'aceptado') echo 'status-accepted';
+                elseif ($estado_postulacion == 'rechazado') echo 'status-rejected';
+                else echo 'status-pending';
+            ?>" data-aos="fade-up" data-aos-delay="100">
+            
+            <div style="text-align: center;">
+                <?php if ($estado_postulacion == 'aceptado'): ?>
+                    <div class="status-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 style="margin-bottom: 1rem;">¡Felicidades! Has sido aceptado</h2>
+                    <p style="font-size: 1.1rem; opacity: 0.9;">
+                        La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> 
+                        te ha aceptado para la oferta <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>
+                    </p>
+                <?php elseif ($estado_postulacion == 'rechazado'): ?>
+                    <div class="status-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h2 style="margin-bottom: 1rem;">Postulación No Aceptada</h2>
+                    <p style="font-size: 1.1rem; opacity: 0.9;">
+                        La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> 
+                        ha rechazado tu postulación para <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>
+                    </p>
+                    <p style="margin-top: 1rem; opacity: 0.8;">¡No te desanimes! Sigue buscando nuevas oportunidades.</p>
+                <?php else: ?>
+                    <div class="status-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h2 style="margin-bottom: 1rem;">Estado de Postulaciones</h2>
+                    <p style="font-size: 1.1rem; opacity: 0.9;">
+                        Aún no has realizado postulaciones o están en proceso de revisión
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
 
-        <!-- Sección de actualización de datos -->
-        <section class="update-section">
-            <h2>Actualizar Información</h2>
-            <form method="POST" class="form">
-                <label for="habilidades">Habilidades:</label>
-                <textarea name="habilidades"><?php echo htmlspecialchars($user_habilidades); ?></textarea>
+        <!-- Grid Principal -->
+        <div class="dashboard-grid">
+            <!-- Actualizar Información -->
+            <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <h2 class="card-title">
+                    <i class="fas fa-user-edit"></i>
+                    Actualizar Información
+                </h2>
+                
+                <form method="POST" onsubmit="addLoadingEffect(this.querySelector('button'))">
+                    <div class="form-group">
+                        <label for="habilidades">
+                            <i class="fas fa-cogs"></i> Habilidades
+                        </label>
+                        <textarea name="habilidades" class="form-control" placeholder="Describe tus habilidades profesionales..."><?php echo htmlspecialchars($user_habilidades); ?></textarea>
+                    </div>
 
-                <label for="experiencia">Experiencia:</label>
-                <textarea name="experiencia"><?php echo htmlspecialchars($user_experiencia); ?></textarea>
+                    <div class="form-group">
+                        <label for="experiencia">
+                            <i class="fas fa-briefcase"></i> Experiencia
+                        </label>
+                        <textarea name="experiencia" class="form-control" placeholder="Detalla tu experiencia laboral..."><?php echo htmlspecialchars($user_experiencia); ?></textarea>
+                    </div>
 
-                <label for="profesion">Profesión:</label>
-                <input type="text" name="profesion" value="<?php echo htmlspecialchars($user_profesion); ?>">
+                    <div class="form-group">
+                        <label for="profesion">
+                            <i class="fas fa-graduation-cap"></i> Profesión
+                        </label>
+                        <input type="text" name="profesion" class="form-control" value="<?php echo htmlspecialchars($user_profesion); ?>" placeholder="Tu profesión actual">
+                    </div>
 
-                <button type="submit" name="actualizar_datos" class="btn">Actualizar Datos</button>
-            </form>
-        </section>
+                    <button type="submit" name="actualizar_datos" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Actualizar Datos
+                    </button>
+                </form>
+            </div>
 
-        <!-- Sección de aceptación/rechazo de la oferta -->
-        <section class="acceptance-section">
-            <?php if ($estado_postulacion == 'aceptado'): ?>
-                <h2>¡Felicidades! Has sido aceptado</h2>
-                <p>La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> te ha aceptado para la oferta <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>.</p>
-            <?php elseif ($estado_postulacion == 'rechazado'): ?>
-                <h2>Lo siento, has sido rechazado</h2>
-                <p>La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> ha rechazado tu postulación para la oferta <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>.</p>
-            <?php else: ?>
-                <h2>Aún no has sido aceptado o rechazado en ninguna oferta.</h2>
-            <?php endif; ?>
-        </section>
+            <!-- Ofertas Disponibles -->
+            <div class="card" data-aos="fade-up" data-aos-delay="300">
+                <h2 class="card-title">
+                    <i class="fas fa-briefcase"></i>
+                    Ofertas Disponibles
+                </h2>
+                
+                <div class="offers-grid">
+                    <?php
+                    // Obtener las ofertas laborales
+                    $sql_ofertas = "SELECT o.id, o.titulo, o.descripcion, o.profesion_solicitada, u.nombre AS empresa_nombre 
+                                    FROM ofertas_laborales o 
+                                    JOIN usuarios u ON o.empresa_id = u.id";
+                    $result_ofertas = $conn->query($sql_ofertas);
 
-        <!-- Sección de ofertas disponibles -->
-        <section class="offers-section">
-            <h2>Ofertas Disponibles</h2>
-            <?php
-            // Obtener las ofertas laborales
-            $sql_ofertas = "SELECT o.id, o.titulo, o.descripcion, o.profesion_solicitada, u.nombre AS empresa_nombre 
-                            FROM ofertas_laborales o 
-                            JOIN usuarios u ON o.empresa_id = u.id";
-            $result_ofertas = $conn->query($sql_ofertas);
+                    if ($result_ofertas->num_rows > 0) {
+                        while ($oferta = $result_ofertas->fetch_assoc()) {
+                            // Verificar si el usuario ya está postulado a esta oferta
+                            $oferta_id = $oferta['id'];
+                            $sql_postulacion = "SELECT * FROM postulaciones WHERE oferta_id = '$oferta_id' AND postulante_id = '$user_id'";
+                            $result_postulacion = $conn->query($sql_postulacion);
 
-            if ($result_ofertas->num_rows > 0) {
-                while ($oferta = $result_ofertas->fetch_assoc()) {
-                    // Verificar si el usuario ya está postulado a esta oferta
-                    $oferta_id = $oferta['id'];
-                    $sql_postulacion = "SELECT * FROM postulaciones WHERE oferta_id = '$oferta_id' AND postulante_id = '$user_id'";
-                    $result_postulacion = $conn->query($sql_postulacion);
+                            // Verificar si el postulante tiene la profesión requerida
+                            $profesion_solicitada = $oferta['profesion_solicitada'];
 
-                    // Verificar si el postulante tiene la profesión requerida
-                    $profesion_solicitada = $oferta['profesion_solicitada'];
-
-                    echo "<div class='offer'>";
-                    echo "<h3>" . htmlspecialchars($oferta['titulo']) . "</h3>";
-                    echo "<p><strong>Empresa:</strong> " . htmlspecialchars($oferta['empresa_nombre']) . "</p>";
-                    echo "<p>" . htmlspecialchars($oferta['descripcion']) . "</p>";
-
-                    if ($user_profesion != $profesion_solicitada) {
-                        echo "<p class='no-apply'>No puedes postularte, la profesión solicitada es diferente a tu profesión.</p>";
-                    } else {
-                        if ($result_postulacion->num_rows > 0) {
-                            echo "<p class='already-applied'>Ya estás postulado a esta oferta.</p>";
-                        } else {
-                            echo "<form action='apply_offer.php' method='post'>
-                                    <input type='hidden' name='oferta_id' value='" . $oferta['id'] . "'>
-                                    <button type='submit' class='btn-apply'>Postularme</button>
-                                  </form>";
+                            echo "<div class='offer-card'>";
+                            echo "<h3 class='offer-title'>" . htmlspecialchars($oferta['titulo']) . "</h3>";
+                            echo "<div class='offer-company'>";
+                            echo "<i class='fas fa-building'></i>";
+                            echo htmlspecialchars($oferta['empresa_nombre']);
+                            echo "</div>";
+                            echo "<p class='offer-description'>" . htmlspecialchars($oferta['descripcion']) . "</p>";
+                            
+                            echo "<div class='offer-actions'>";
+                            
+                            if ($user_profesion != $profesion_solicitada) {
+                                echo "<div class='status-message no-apply'>";
+                                echo "<i class='fas fa-exclamation-triangle'></i> ";
+                                echo "Profesión requerida: " . htmlspecialchars($profesion_solicitada);
+                                echo "</div>";
+                            } else {
+                                if ($result_postulacion->num_rows > 0) {
+                                    echo "<div class='status-message already-applied'>";
+                                    echo "<i class='fas fa-check'></i> Ya postulado";
+                                    echo "</div>";
+                                } else {
+                                    echo "<form action='apply_offer.php' method='post' style='display: inline;'>";
+                                    echo "<input type='hidden' name='oferta_id' value='" . $oferta['id'] . "'>";
+                                    echo "<button type='submit' class='btn-apply'>";
+                                    echo "<i class='fas fa-paper-plane'></i> Postularme";
+                                    echo "</button>";
+                                    echo "</form>";
+                                }
+                            }
+                            
+                            echo "</div>";
+                            echo "</div>";
                         }
+                    } else {
+                        echo "<div style='text-align: center; padding: 2rem; color: #6c757d;'>";
+                        echo "<i class='fas fa-inbox' style='font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;'></i>";
+                        echo "<p>No hay ofertas disponibles en este momento</p>";
+                        echo "</div>";
                     }
-
-                    echo "</div><hr>";
-                }
-            } else {
-                echo "<p>No hay ofertas disponibles en este momento.</p>";
-            }
-            ?>
-        </section>
+                    ?>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- AOS Animation Script -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </body>
 </html>
