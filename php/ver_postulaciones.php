@@ -31,9 +31,10 @@ if (isset($_GET['oferta_id'])) {
 }
 
 // Obtener los postulantes a la oferta
-$sql_postulantes = "SELECT p.*, u.nombre AS postulante_nombre, u.email AS postulante_email
+$sql_postulantes = "SELECT p.*, u.nombre AS postulante_nombre, u.email AS postulante_email, pi.cv
                     FROM postulaciones p
                     JOIN usuarios u ON p.postulante_id = u.id
+                    LEFT JOIN postulantes_info pi ON u.id = pi.usuario_id
                     WHERE p.oferta_id = '$oferta_id'";
 $result_postulantes = $conn->query($sql_postulantes);
 
@@ -304,6 +305,79 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 8px 25px rgba(225, 112, 85, 0.3);
         }
 
+/* Botón Ver CV - Diseño moderno EmpleoExpress */
+.btn-cv {
+    background: linear-gradient(135deg, #4c8bca 0%, #3a6f9a 100%);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 139, 202, 0.3);
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-cv:hover {
+    background: linear-gradient(135deg, #3a6f9a 0%, #2c5a7a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 139, 202, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-cv:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(76, 139, 202, 0.3);
+}
+
+.btn-cv i {
+    font-size: 1rem;
+    color: white;
+}
+
+/* Estado cuando no está disponible el CV */
+.cv-no-disponible {
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+}
+
+.cv-no-disponible i {
+    color: #ffc107;
+    font-size: 0.9rem;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .btn-cv {
+        padding: 12px 16px;
+        font-size: 0.8rem;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+    
+    .cv-no-disponible {
+        padding: 12px 16px;
+        font-size: 0.8rem;
+        justify-content: center;
+    }
+}
         /* Botón de regreso */
         .back-section {
             margin-top: 2rem;
@@ -505,85 +579,102 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="table-responsive">
                     <table class="postulantes-table">
                         <thead>
-                            <tr>
-                                <th><i class="fas fa-user"></i> Candidato</th>
-                                <th><i class="fas fa-envelope"></i> Contacto</th>
-                                <th><i class="fas fa-flag"></i> Estado</th>
-                                <th><i class="fas fa-cogs"></i> Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php 
+    <tr>
+        <th><i class="fas fa-user"></i> Candidato</th>
+        <th><i class="fas fa-envelope"></i> Contacto</th>
+        <th><i class="fas fa-file-pdf"></i> Hoja de Vida</th>
+        <th><i class="fas fa-flag"></i> Estado</th>
+        <th><i class="fas fa-cogs"></i> Acciones</th>
+    </tr>
+</thead>
+
+<?php
                             // Reiniciar el puntero del resultado
                             $result_postulantes->data_seek(0);
                             while ($postulante = $result_postulantes->fetch_assoc()): 
-                            ?>
-                                <tr class="fade-in">
-                                    <td>
-                                        <div class="postulante-info">
-                                            <div class="postulante-avatar">
-                                                <?php echo strtoupper(substr($postulante['postulante_nombre'], 0, 1)); ?>
-                                            </div>
-                                            <div class="postulante-details">
-                                                <h4><?php echo htmlspecialchars($postulante['postulante_nombre']); ?></h4>
-                                                <p>Candidato</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="postulante-details">
-                                            <h4><?php echo htmlspecialchars($postulante['postulante_email']); ?></h4>
-                                            <p><i class="fas fa-envelope"></i> Email de contacto</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <?php 
-                                        $estado = $postulante['estado'];
-                                        $estado_class = 'estado-pendiente';
-                                        $estado_icon = 'fas fa-clock';
-                                        
-                                        if ($estado == 'aceptado') {
-                                            $estado_class = 'estado-aceptado';
-                                            $estado_icon = 'fas fa-check-circle';
-                                        } elseif ($estado == 'rechazado') {
-                                            $estado_class = 'estado-rechazado';
-                                            $estado_icon = 'fas fa-times-circle';
-                                        }
-                                        ?>
-                                        <span class="estado-badge <?php echo $estado_class; ?>">
-                                            <i class="<?php echo $estado_icon; ?>"></i>
-                                            <?php echo ucfirst($estado); ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <?php if ($postulante['estado'] == 'aceptado'): ?>
-                                                <span class="estado-badge estado-aceptado">
-                                                    <i class="fas fa-check-circle"></i>
-                                                    Aceptado
-                                                </span>
-                                            <?php elseif ($postulante['estado'] == 'rechazado'): ?>
-                                                <span class="estado-badge estado-rechazado">
-                                                    <i class="fas fa-times-circle"></i>
-                                                    Rechazado
-                                                </span>
-                                            <?php else: ?>
-                                                <form method="POST" action="ver_postulaciones.php?oferta_id=<?php echo $oferta_id; ?>" style="display: contents;">
-                                                    <input type="hidden" name="postulante_id" value="<?php echo $postulante['postulante_id']; ?>">
-                                                    <button type="submit" name="aceptar_postulante" class="btn btn-aceptar" onclick="this.classList.add('btn-loading')">
-                                                        <i class="fas fa-check"></i>
-                                                        Aceptar
-                                                    </button>
-                                                    <button type="submit" name="rechazar_postulante" class="btn btn-rechazar" onclick="this.classList.add('btn-loading')">
-                                                        <i class="fas fa-times"></i>
-                                                        Rechazar
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
+?>
+    <tr class="fade-in">
+        <td>
+            <div class="postulante-info">
+                <div class="postulante-avatar">
+                    <?php echo strtoupper(substr($postulante['postulante_nombre'], 0, 1)); ?>
+                </div>
+                <div class="postulante-details">
+                    <h4><?php echo htmlspecialchars($postulante['postulante_nombre']); ?></h4>
+                    <p>Candidato</p>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="postulante-details">
+                <h4><?php echo htmlspecialchars($postulante['postulante_email']); ?></h4>
+                <p><i class="fas fa-envelope"></i> Email de contacto</p>
+            </div>
+        </td>
+        <!-- NUEVA CELDA PARA MOSTRAR CV -->
+        <td>
+            <?php if ($postulante['cv'] && !empty(trim($postulante['cv']))): ?>
+                <a href="<?php echo htmlspecialchars($postulante['cv']); ?>" 
+                   target="_blank" 
+                   class="btn-cv">
+                    <i class="fas fa-file-pdf"></i>
+                    Ver CV
+                </a>
+            <?php else: ?>
+                <span class="cv-no-disponible">
+                    <i class="fas fa-exclamation-circle"></i>
+                    No disponible
+                </span>
+            <?php endif; ?>
+        </td>
+        <td>
+            <?php 
+            $estado = $postulante['estado'];
+            $estado_class = 'estado-pendiente';
+            $estado_icon = 'fas fa-clock';
+            
+            if ($estado == 'aceptado') {
+                $estado_class = 'estado-aceptado';
+                $estado_icon = 'fas fa-check-circle';
+            } elseif ($estado == 'rechazado') {
+                $estado_class = 'estado-rechazado';
+                $estado_icon = 'fas fa-times-circle';
+            }
+            ?>
+            <span class="estado-badge <?php echo $estado_class; ?>">
+                <i class="<?php echo $estado_icon; ?>"></i>
+                <?php echo ucfirst($estado); ?>
+            </span>
+        </td>
+        <td>
+            <div class="action-buttons">
+                <?php if ($postulante['estado'] == 'aceptado'): ?>
+                    <span class="estado-badge estado-aceptado">
+                        <i class="fas fa-check-circle"></i>
+                        Aceptado
+                    </span>
+                <?php elseif ($postulante['estado'] == 'rechazado'): ?>
+                    <span class="estado-badge estado-rechazado">
+                        <i class="fas fa-times-circle"></i>
+                        Rechazado
+                    </span>
+                <?php else: ?>
+                    <form method="POST" action="ver_postulaciones.php?oferta_id=<?php echo $oferta_id; ?>" style="display: contents;">
+                        <input type="hidden" name="postulante_id" value="<?php echo $postulante['postulante_id']; ?>">
+                        <button type="submit" name="aceptar_postulante" class="btn btn-aceptar" onclick="this.classList.add('btn-loading')">
+                            <i class="fas fa-check"></i>
+                            Aceptar
+                        </button>
+                        <button type="submit" name="rechazar_postulante" class="btn btn-rechazar" onclick="this.classList.add('btn-loading')">
+                            <i class="fas fa-times"></i>
+                            Rechazar
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        </td>
+    </tr>
+<?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>
@@ -595,6 +686,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             <?php endif; ?>
         </div>
+
 
         <!-- Botón de regreso -->
         <div class="back-section">

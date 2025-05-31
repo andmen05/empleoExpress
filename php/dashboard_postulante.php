@@ -1,27 +1,28 @@
 <?php
-session_start(); // Inicia la sesión
+session_start();
 include('db.php');
 
-// Verificar si el usuario está logueado y es un postulante
+// ===== VERIFICACIÓN DE SESIÓN =====
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'postulante') {
-    header("Location: login.php"); // Redirigir al login si no está logueado o no es postulante
+    header("Location: login.php");
     exit();
 }
 
-$user_id = $_SESSION['user_id']; // Obtener el ID del usuario desde la sesión
+$user_id = $_SESSION['user_id'];
 
-// Obtener el nombre y la información del postulante
+// ===== OBTENER INFORMACIÓN DEL USUARIO =====
 $sql_user = "SELECT nombre, habilidades, experiencia, profesion FROM usuarios u
              JOIN postulantes_info p ON u.id = p.usuario_id
              WHERE u.id = '$user_id'";
 $result_user = $conn->query($sql_user);
 $user = $result_user->fetch_assoc();
+
 $user_name = $user['nombre'];
 $user_habilidades = $user['habilidades'];
 $user_experiencia = $user['experiencia'];
 $user_profesion = $user['profesion'];
 
-// Verificar el estado de la postulación (aceptado o rechazado)
+// ===== VERIFICAR ESTADO DE POSTULACIÓN =====
 $sql_aceptacion_rechazo = "SELECT o.titulo AS oferta_titulo, u.nombre AS empresa_nombre, p.estado
                            FROM postulaciones p
                            JOIN ofertas_laborales o ON p.oferta_id = o.id
@@ -30,40 +31,36 @@ $sql_aceptacion_rechazo = "SELECT o.titulo AS oferta_titulo, u.nombre AS empresa
 
 $result_aceptacion_rechazo = $conn->query($sql_aceptacion_rechazo);
 
-// Inicializar variables
-$estado_postulacion = '';
+$estado_postulacion = 'sin_postulacion';
 $empresa_aceptante = '';
 $oferta_aceptada = '';
+
 if ($result_aceptacion_rechazo->num_rows > 0) {
     $row = $result_aceptacion_rechazo->fetch_assoc();
     $estado_postulacion = $row['estado'];
     $empresa_aceptante = $row['empresa_nombre'];
     $oferta_aceptada = $row['oferta_titulo'];
-} else {
-    $estado_postulacion = 'sin_postulacion';
 }
 
-// Actualizar la información del postulante
+// ===== PROCESAR ACTUALIZACIÓN DE DATOS =====
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
     $nuevas_habilidades = $_POST['habilidades'];
     $nueva_experiencia = $_POST['experiencia'];
     $nueva_profesion = $_POST['profesion'];
 
-    // Actualizar en la base de datos
     $sql_actualizar = "UPDATE postulantes_info 
-                       SET habilidades = '$nuevas_habilidades', experiencia = '$nueva_experiencia', profesion = '$nueva_profesion'
+                       SET habilidades = '$nuevas_habilidades', 
+                           experiencia = '$nueva_experiencia', 
+                           profesion = '$nueva_profesion'
                        WHERE usuario_id = '$user_id'";
 
     if ($conn->query($sql_actualizar) === TRUE) {
-        $_SESSION['datos_actualizados'] = 'Datos actualizados correctamente'; // Establece la variable de sesión
+        $_SESSION['datos_actualizados'] = 'Datos actualizados correctamente';
         
-        // Recargar los valores actualizados directamente desde la base de datos
-        $sql_user = "SELECT nombre, habilidades, experiencia, profesion FROM usuarios u
-                     JOIN postulantes_info p ON u.id = p.usuario_id
-                     WHERE u.id = '$user_id'";
+        // Recargar valores actualizados
         $result_user = $conn->query($sql_user);
         $user = $result_user->fetch_assoc();
-
+        
         $user_habilidades = $user['habilidades'];
         $user_experiencia = $user['experiencia'];
         $user_profesion = $user['profesion'];
@@ -71,6 +68,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
         echo "<p>Error al actualizar los datos: " . $conn->error . "</p>";
     }
 }
+
+// ===== CALCULAR PROGRESO DEL PERFIL =====
+$progreso = 0;
+$total = 4;
+
+$query = "SELECT u.nombre, u.email, u.password, pi.cv FROM usuarios u 
+          LEFT JOIN postulantes_info pi ON u.id = pi.usuario_id 
+          WHERE u.id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$datos = $result->fetch_assoc();
+
+if (!empty($datos['nombre'])) $progreso++;
+if (!empty($datos['email'])) $progreso++;
+if (!empty($datos['password'])) $progreso++;
+if (!empty($datos['cv'])) $progreso++;
+
+$porcentaje = ($progreso / $total) * 100;
 ?>
 
 <!DOCTYPE html>
@@ -80,13 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard del Postulante - EmpleoExpress</title>
     
-    <!-- Google Fonts -->
+    <!-- ===== FUENTES Y LIBRERÍAS ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <style>
@@ -117,12 +130,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             z-index: -1;
         }
 
-        /* ===== CONTAINER PRINCIPAL ===== */
+        /* ===== LAYOUT PRINCIPAL ===== */
         .dashboard-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
             animation: fadeInUp 0.8s ease-out;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
 
         /* ===== HEADER ===== */
@@ -167,33 +187,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             font-weight: 400;
         }
 
-        .logout-btn {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+        /* ===== PROGRESO DEL PERFIL ===== */
+        .profile-progress {
+            margin: 20px 0;
         }
 
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        .progress-bar-container {
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin-top: 0.5rem;
         }
 
-        /* ===== GRID LAYOUT ===== */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0;
+            transition: width 0.5s;
         }
 
         /* ===== CARDS GENERALES ===== */
@@ -227,7 +238,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             font-size: 1.25rem;
         }
 
-        /* ===== FORMULARIO DE ACTUALIZACIÓN ===== */
+        /* ===== ESTADO DE POSTULACIÓN ===== */
+        .status-card {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status-accepted {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .status-rejected {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        /* ===== FORMULARIOS ===== */
         .form-group {
             margin-bottom: 1.5rem;
             position: relative;
@@ -265,10 +303,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
         }
 
         /* ===== BOTONES ===== */
-        .btn-primary {
-            background: linear-gradient(135deg, #4c8bca 0%, #3a6f9a 100%);
-            color: white;
-            padding: 15px 30px;
+        .btn {
+            padding: 12px 24px;
             border: none;
             border-radius: 12px;
             font-weight: 600;
@@ -278,8 +314,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4c8bca 0%, #3a6f9a 100%);
+            color: white;
             width: 100%;
             justify-content: center;
+            padding: 15px 30px;
         }
 
         .btn-primary:hover {
@@ -291,14 +334,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
             padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .btn-apply:hover {
@@ -306,30 +341,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             box-shadow: 0 8px 16px rgba(46, 204, 113, 0.3);
         }
 
-        /* ===== ESTADO DE POSTULACIÓN ===== */
-        .status-card {
-            margin-bottom: 2rem;
-        }
-
-        .status-accepted {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        .btn-editar {
+            background-color: #4c8bca;
             color: white;
+            margin-top: 10px;
         }
 
-        .status-rejected {
+        .btn-editar:hover {
+            background-color: #0056b3;
+        }
+
+       .logout-btn {
             background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: var(--border-radius-input);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            cursor: pointer;
         }
 
-        .status-pending {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            color: white;
-        }
-
-        .status-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.9;
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
         }
 
         /* ===== OFERTAS LABORALES ===== */
@@ -380,6 +420,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             justify-content: space-between;
         }
 
+        /* ===== MENSAJES DE ESTADO ===== */
         .status-message {
             padding: 10px 15px;
             border-radius: 8px;
@@ -399,6 +440,56 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             border: 1px solid #f5c6cb;
         }
 
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== ESTADOS DE CARGA ===== */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* ===== SECCIÓN VACÍA ===== */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
         /* ===== ANIMACIONES ===== */
         @keyframes fadeInUp {
             from {
@@ -409,6 +500,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* ===== RESPONSIVE DESIGN ===== */
@@ -432,69 +539,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             .card {
                 padding: 1.5rem;
             }
-
-            .offers-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ===== MENSAJE DE ÉXITO ===== */
-        .success-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
-            z-index: 1000;
-            animation: slideInRight 0.5s ease-out;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* ===== LOADING STATES ===== */
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid transparent;
-            border-top-color: #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 
     <script>
-        // Mostrar el mensaje de éxito si los datos fueron actualizados
+        // ===== MENSAJE DE ÉXITO =====
         <?php if (isset($_SESSION['datos_actualizados'])): ?>
             window.onload = function() {
                 showSuccessMessage("<?php echo $_SESSION['datos_actualizados']; ?>");
@@ -514,13 +563,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
             }, 3000);
         }
 
-        // Añadir efecto de loading a los botones
+        // ===== EFECTO DE CARGA =====
         function addLoadingEffect(button) {
             button.classList.add('btn-loading');
             button.innerHTML = '<span style="opacity: 0;">Cargando...</span>';
         }
 
-        // Inicializar AOS
+        // ===== INICIALIZAR AOS =====
         document.addEventListener('DOMContentLoaded', function() {
             AOS.init({
                 duration: 800,
@@ -529,13 +578,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
         });
     </script>
 </head>
+
 <body>
     <div class="dashboard-container">
-        <!-- Header -->
+        
+        <!-- ===== HEADER ===== -->
         <header class="dashboard-header" data-aos="fade-down">
             <div class="header-content">
                 <div class="welcome-section">
-                    <h1><i class="fas fa-user-circle"></i> Bienvenido, <?php echo htmlspecialchars($user_name); ?></h1>
+                    <h1>
+                        <i class="fas fa-user-circle"></i> 
+                        Bienvenido, <?php echo htmlspecialchars($user_name); ?>
+                    </h1>
                     <p>Gestiona tu perfil profesional y encuentra las mejores oportunidades laborales</p>
                 </div>
                 <a href="logout.php" class="logout-btn">
@@ -543,9 +597,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
                     Cerrar Sesión
                 </a>
             </div>
+
+            <!-- ===== PROGRESO DEL PERFIL ===== -->
+            <div class="profile-progress">
+                <label>Progreso del perfil: <?php echo round($porcentaje); ?>%</label>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: <?php echo $porcentaje; ?>%;"></div>
+                </div>
+            </div>
         </header>
 
-        <!-- Estado de Postulación -->
+        <!-- ===== ESTADO DE POSTULACIÓN ===== -->
         <div class="status-card card 
             <?php 
                 if ($estado_postulacion == 'aceptado') echo 'status-accepted';
@@ -553,41 +615,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
                 else echo 'status-pending';
             ?>" data-aos="fade-up" data-aos-delay="100">
             
-            <div style="text-align: center;">
-                <?php if ($estado_postulacion == 'aceptado'): ?>
-                    <div class="status-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h2 style="margin-bottom: 1rem;">¡Felicidades! Has sido aceptado</h2>
-                    <p style="font-size: 1.1rem; opacity: 0.9;">
-                        La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> 
-                        te ha aceptado para la oferta <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>
-                    </p>
-                <?php elseif ($estado_postulacion == 'rechazado'): ?>
-                    <div class="status-icon">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <h2 style="margin-bottom: 1rem;">Postulación No Aceptada</h2>
-                    <p style="font-size: 1.1rem; opacity: 0.9;">
-                        La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> 
-                        ha rechazado tu postulación para <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>
-                    </p>
-                    <p style="margin-top: 1rem; opacity: 0.8;">¡No te desanimes! Sigue buscando nuevas oportunidades.</p>
-                <?php else: ?>
-                    <div class="status-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h2 style="margin-bottom: 1rem;">Estado de Postulaciones</h2>
-                    <p style="font-size: 1.1rem; opacity: 0.9;">
-                        Aún no has realizado postulaciones o están en proceso de revisión
-                    </p>
-                <?php endif; ?>
-            </div>
+            <?php if ($estado_postulacion == 'aceptado'): ?>
+                <div class="status-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 style="margin-bottom: 1rem;">¡Felicidades! Has sido aceptado</h2>
+                <p style="font-size: 1.1rem; opacity: 0.9;">
+                    La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> 
+                    te ha aceptado para la oferta <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>
+                </p>
+                
+            <?php elseif ($estado_postulacion == 'rechazado'): ?>
+                <div class="status-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h2 style="margin-bottom: 1rem;">Postulación No Aceptada</h2>
+                <p style="font-size: 1.1rem; opacity: 0.9;">
+                    La empresa <strong><?php echo htmlspecialchars($empresa_aceptante); ?></strong> 
+                    ha rechazado tu postulación para <strong><?php echo htmlspecialchars($oferta_aceptada); ?></strong>
+                </p>
+                <p style="margin-top: 1rem; opacity: 0.8;">¡No te desanimes! Sigue buscando nuevas oportunidades.</p>
+                
+            <?php else: ?>
+                <div class="status-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h2 style="margin-bottom: 1rem;">Estado de Postulaciones</h2>
+                <p style="font-size: 1.1rem; opacity: 0.9;">
+                    Aún no has realizado postulaciones o están en proceso de revisión
+                </p>
+            <?php endif; ?>
         </div>
 
-        <!-- Grid Principal -->
+        <!-- ===== GRID PRINCIPAL ===== -->
         <div class="dashboard-grid">
-            <!-- Actualizar Información -->
+            
+            <!-- ===== ACTUALIZAR INFORMACIÓN ===== -->
             <div class="card" data-aos="fade-up" data-aos-delay="200">
                 <h2 class="card-title">
                     <i class="fas fa-user-edit"></i>
@@ -599,31 +662,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
                         <label for="habilidades">
                             <i class="fas fa-cogs"></i> Habilidades
                         </label>
-                        <textarea name="habilidades" class="form-control" placeholder="Describe tus habilidades profesionales..."><?php echo htmlspecialchars($user_habilidades); ?></textarea>
+                        <textarea name="habilidades" class="form-control" 
+                                  placeholder="Describe tus habilidades profesionales..."><?php echo htmlspecialchars($user_habilidades); ?></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="experiencia">
                             <i class="fas fa-briefcase"></i> Experiencia
                         </label>
-                        <textarea name="experiencia" class="form-control" placeholder="Detalla tu experiencia laboral..."><?php echo htmlspecialchars($user_experiencia); ?></textarea>
+                        <textarea name="experiencia" class="form-control" 
+                                  placeholder="Detalla tu experiencia laboral..."><?php echo htmlspecialchars($user_experiencia); ?></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="profesion">
                             <i class="fas fa-graduation-cap"></i> Profesión
                         </label>
-                        <input type="text" name="profesion" class="form-control" value="<?php echo htmlspecialchars($user_profesion); ?>" placeholder="Tu profesión actual">
+                        <input type="text" name="profesion" class="form-control" 
+                               value="<?php echo htmlspecialchars($user_profesion); ?>" 
+                               placeholder="Tu profesión actual">
                     </div>
 
-                    <button type="submit" name="actualizar_datos" class="btn-primary">
+                    <button type="submit" name="actualizar_datos" class="btn btn-primary">
                         <i class="fas fa-save"></i>
                         Actualizar Datos
                     </button>
                 </form>
+                
+                <a href="subir_cv.php" class="btn btn-editar">
+                    <i class="fas fa-upload"></i>
+                    Subir hoja de vida
+                </a>
             </div>
 
-            <!-- Ofertas Disponibles -->
+            <!-- ===== OFERTAS DISPONIBLES ===== -->
             <div class="card" data-aos="fade-up" data-aos-delay="300">
                 <h2 class="card-title">
                     <i class="fas fa-briefcase"></i>
@@ -632,7 +704,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
                 
                 <div class="offers-grid">
                     <?php
-                    // Obtener las ofertas laborales
                     $sql_ofertas = "SELECT o.id, o.titulo, o.descripcion, o.profesion_solicitada, u.nombre AS empresa_nombre 
                                     FROM ofertas_laborales o 
                                     JOIN usuarios u ON o.empresa_id = u.id";
@@ -640,60 +711,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['actualizar_datos'])) {
 
                     if ($result_ofertas->num_rows > 0) {
                         while ($oferta = $result_ofertas->fetch_assoc()) {
-                            // Verificar si el usuario ya está postulado a esta oferta
                             $oferta_id = $oferta['id'];
                             $sql_postulacion = "SELECT * FROM postulaciones WHERE oferta_id = '$oferta_id' AND postulante_id = '$user_id'";
                             $result_postulacion = $conn->query($sql_postulacion);
-
-                            // Verificar si el postulante tiene la profesión requerida
                             $profesion_solicitada = $oferta['profesion_solicitada'];
-
-                            echo "<div class='offer-card'>";
-                            echo "<h3 class='offer-title'>" . htmlspecialchars($oferta['titulo']) . "</h3>";
-                            echo "<div class='offer-company'>";
-                            echo "<i class='fas fa-building'></i>";
-                            echo htmlspecialchars($oferta['empresa_nombre']);
-                            echo "</div>";
-                            echo "<p class='offer-description'>" . htmlspecialchars($oferta['descripcion']) . "</p>";
-                            
-                            echo "<div class='offer-actions'>";
-                            
-                            if ($user_profesion != $profesion_solicitada) {
-                                echo "<div class='status-message no-apply'>";
-                                echo "<i class='fas fa-exclamation-triangle'></i> ";
-                                echo "Profesión requerida: " . htmlspecialchars($profesion_solicitada);
-                                echo "</div>";
-                            } else {
-                                if ($result_postulacion->num_rows > 0) {
-                                    echo "<div class='status-message already-applied'>";
-                                    echo "<i class='fas fa-check'></i> Ya postulado";
-                                    echo "</div>";
-                                } else {
-                                    echo "<form action='apply_offer.php' method='post' style='display: inline;'>";
-                                    echo "<input type='hidden' name='oferta_id' value='" . $oferta['id'] . "'>";
-                                    echo "<button type='submit' class='btn-apply'>";
-                                    echo "<i class='fas fa-paper-plane'></i> Postularme";
-                                    echo "</button>";
-                                    echo "</form>";
-                                }
-                            }
-                            
-                            echo "</div>";
-                            echo "</div>";
+                    ?>
+                            <div class='offer-card'>
+                                <h3 class='offer-title'><?php echo htmlspecialchars($oferta['titulo']); ?></h3>
+                                <div class='offer-company'>
+                                    <i class='fas fa-building'></i>
+                                    <?php echo htmlspecialchars($oferta['empresa_nombre']); ?>
+                                </div>
+                                <p class='offer-description'><?php echo htmlspecialchars($oferta['descripcion']); ?></p>
+                                
+                                <div class='offer-actions'>
+                                    <?php if ($user_profesion != $profesion_solicitada): ?>
+                                        <div class='status-message no-apply'>
+                                            <i class='fas fa-exclamation-triangle'></i> 
+                                            Profesión requerida: <?php echo htmlspecialchars($profesion_solicitada); ?>
+                                        </div>
+                                    <?php elseif ($result_postulacion->num_rows > 0): ?>
+                                        <div class='status-message already-applied'>
+                                            <i class='fas fa-check'></i> Ya postulado
+                                        </div>
+                                    <?php else: ?>
+                                        <form action='apply_offer.php' method='post' style='display: inline;'>
+                                            <input type='hidden' name='oferta_id' value='<?php echo $oferta['id']; ?>'>
+                                            <button type='submit' class='btn btn-apply'>
+                                                <i class='fas fa-paper-plane'></i> Postularme
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                    <?php
                         }
                     } else {
-                        echo "<div style='text-align: center; padding: 2rem; color: #6c757d;'>";
-                        echo "<i class='fas fa-inbox' style='font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;'></i>";
-                        echo "<p>No hay ofertas disponibles en este momento</p>";
-                        echo "</div>";
-                    }
                     ?>
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay ofertas disponibles en este momento</p>
+                        </div>
+                    <?php } ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- AOS Animation Script -->
+    <!-- ===== SCRIPTS ===== -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </body>
 </html>

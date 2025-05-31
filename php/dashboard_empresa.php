@@ -746,7 +746,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['postulante_id']) && is
                                 <th><i class="fas fa-briefcase"></i> Oferta</th>
                                 <th><i class="fas fa-calendar"></i> Fecha</th>
                                 <th><i class="fas fa-info-circle"></i> Estado</th>
-                                <th><i class="fas fa-cogs"></i> Acción</th>
+                                
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -771,34 +772,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['postulante_id']) && is
                                     </td>
                                     <td>
                                         <?php if ($postulacion['estado'] == 'aceptado'): ?>
-                                            <span class="status-badge status-accepted">
-                                                <i class="fas fa-check-circle"></i>
-                                                Aceptado
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="status-badge status-pending">
-                                                <i class="fas fa-clock"></i>
-                                                Pendiente
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($postulacion['estado'] != 'aceptado'): ?>
-                                            <form method="POST" action="" style="display: inline;">
-                                                <input type="hidden" name="postulante_id" value="<?php echo $postulacion['postulante_id']; ?>">
-                                                <input type="hidden" name="oferta_id" value="<?php echo $postulacion['oferta_id']; ?>">
-                                                <button type="submit" class="btn btn-success">
-                                                    <i class="fas fa-user-check"></i>
-                                                    Aceptar
-                                                </button>
-                                            </form>
-                                        <?php else: ?>
-                                            <span class="text-muted">
-                                                <i class="fas fa-check"></i>
-                                                Procesado
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
+    <span class="status-badge status-accepted">
+        <i class="fas fa-check-circle"></i> Aceptado
+    </span>
+<?php elseif ($postulacion['estado'] == 'rechazado'): ?>
+    <span class="status-badge status-rejected">
+        <i class="fas fa-times-circle"></i> Rechazado
+    </span>
+<?php else: ?>
+    <span class="status-badge status-pending">
+        <i class="fas fa-clock"></i> Pendiente
+    </span>
+<?php endif; ?>
+
+                                    
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
